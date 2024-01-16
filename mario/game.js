@@ -3,45 +3,55 @@ kaboom({
   fullscreen: true,
   scale: 1,
   debug: true,
-  clearColor: [0, 0, 0, 1],
+  clearColor: [0, 0, 0, 1]
 });
-loadRoot("https://i.imgur.com/");
-loadSprite("coin", "wbKxhcd.png");
-loadSprite("evil-shroom", "KPO3fR9.png");
-loadSprite("brick", "pogC9x5.png");
-loadSprite("block", "bdrLpi6.png");
-loadSprite("mario", "Wb1qfhk.png");
-loadSprite("mushroom", "0wMd92p.png");
-loadSprite("surprise", "gesQ1KP.png");
-loadSprite("unboxed", "bdrLpi6.png");
-loadSprite("pipe-top-left", "ReTPiWY.png");
-loadSprite("pipe-top-righ", "hj2GK4n.png");
-loadSprite("pipe-bottom-left", "c1cYSbt.png");
-loadSprite("pipe-bottom-righ", "nqQ79eI.png");
 
-scene("game", () => {
-  layers(["bg", "obj", "ui"], "obj");
+loadRoot('./sprites/');
+
+loadSprite('coin', 'coin.png');
+loadSprite('evil-shroom', 'evil-shroom.png');
+loadSprite('brick', 'brick.png');
+loadSprite('block', 'block.png');
+loadSprite('mario', 'mario.png');
+loadSprite('mushroom', 'mushroom.png');
+loadSprite('surprise', 'surprise.png');
+loadSprite('unboxed', 'unboxed.png');
+loadSprite('pipe-top-left', 'pipe-top-left.png');
+loadSprite('pipe-top-right', 'pipe-top-right.png');
+loadSprite('pipe-bottom-left', 'pipe-bottom-left.png');
+loadSprite('pipe-bottom-right', 'pipe-bottom-right.png');
+
+scene('game', () => {
+  add([
+    rect(width(), height()), //
+    color(0, 0, 255), //
+    z(-1)
+  ]);
 
   const map = [
-    "                                     ",
-    "                                     ",
-    "                                     ",
-    "                                     ",
-    "                                     ",
-    "                                     ",
-    "                                     ",
-    "                                     ",
-    "                                     ",
-    "==============================  =====",
+    '                                     ',
+    '                                     ',
+    '                                     ',
+    '                                     ',
+    '                                     ',
+    '                                     ',
+    '                                     ',
+    '                                     ',
+    '                                     ',
+    '==============================  ====='
   ];
 
   const levelCfg = {
     width: 20,
-    hight: 20,
-    "=": [sprite("block", solid())],
+    height: 20,
+    tileWidth: 20,
+    tileHeight: 20,
+    tiles: {
+      '=': () => [sprite('brick')]
+    }
   };
 
-  const gameLevel = addlevel(map, levelCfg);
+  const gameLevel = addLevel(map, levelCfg);
 });
 
-start("game");
+go('game');
