@@ -7,6 +7,7 @@ kaboom({
 });
 
 loadRoot('./sprites/');
+setGravity(2000);
 
 loadSprite('coin', 'coin.png');
 loadSprite('evil-shroom', 'evil-shroom.png');
@@ -35,9 +36,9 @@ scene('game', () => {
     '                                     ',
     '                                     ',
     '                                     ',
-    '                                     ',
-    '                                     ',
-    '                                     ',
+    '    %     =*===                      ',
+    '                           -+       ',
+    '                 ^    ^    ()       ',
     '==============================  ====='
   ];
 
@@ -47,11 +48,85 @@ scene('game', () => {
     tileWidth: 20,
     tileHeight: 20,
     tiles: {
-      '=': () => [sprite('brick')]
+      '=': () => [sprite('brick'), area(), body({ isStatic: true })],
+      $: () => [sprite('coin')],
+      '%': () => [sprite('surprise'), 'coin-surprise'],
+      '*': () => [sprite('surprise'), 'mushroom-surprise'],
+      '{': () => [sprite('unboxed')],
+      '(': () => [sprite('pipe-bottom-left'), scale(0.5)],
+      ')': () => [sprite('pipe-bottom-right'), scale(0.5)],
+      '-': () => [sprite('pipe-top-left'), scale(0.5)],
+      '+': () => [sprite('pipe-top-right'), scale(0.5)],
+      '^': () => [sprite('evil-shroom')]
     }
   };
 
   const gameLevel = addLevel(map, levelCfg);
+  const scoreLable = add([
+    text('score'),
+    pos(30, 6),
+    {
+      value: 'score'
+    }
+  ]);
+  add([text('level' + 'test', pos(4, 6))]);
+
+  function big() {
+    let timer = 0;
+    let isBig = false;
+    return {
+      update() {
+        if (isBig) {
+          timer -= dt();
+          if (timer <= 0) {
+            this.smallify();
+          }
+        }
+      },
+      isBig() {
+        return isBig;
+      },
+      smallify() {
+        this.scale = vec2(1);
+        timer = 0;
+        isBig = false;
+      },
+      biggify(time) {
+        this.scale = vec2(2);
+        timer = time;
+        isBig = true;
+      }
+    };
+  }
+
+  const player = add([sprite('mario'), pos(30, 0), body(), area(), big()]);
+  // Set the player's move speed and jump force
+  player.moveSpeed = 200;
+  player.jumpForce = 600;
+
+  // Define left and right movement
+  onKeyDown('left', () => {
+    player.move(-player.moveSpeed, 0);
+  });
+
+  onKeyDown('right', () => {
+    player.move(player.moveSpeed, 0);
+  });
+
+  // Define jumping
+  onKeyPress('space', () => {
+    if (player.isGrounded()) {
+      player.jump(player.jumpForce);
+    }
+  });
+  // check if player falls off the map
+  loop(1 / 60, () => {
+    // runs 60 times per second
+    if (player.pos.y >= height()) {
+      // end the game or switch to a different scene
+      go('game'); // assuming 'gameover' is a scene you've defined
+    }
+  });
 });
 
 go('game');
