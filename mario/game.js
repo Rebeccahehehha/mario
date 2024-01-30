@@ -50,7 +50,12 @@ scene('game', () => {
     tiles: {
       '=': () => [sprite('brick'), area(), body({ isStatic: true })],
       $: () => [sprite('coin')],
-      '%': () => [sprite('surprise'), 'coin-surprise'],
+      '%': () => [
+        sprite('surprise'),
+        'coin-surprise',
+        area(),
+        body({ isStatic: true })
+      ],
       '*': () => [sprite('surprise'), 'mushroom-surprise'],
       '{': () => [sprite('unboxed')],
       '(': () => [sprite('pipe-bottom-left'), scale(0.5)],
@@ -104,6 +109,12 @@ scene('game', () => {
   player.moveSpeed = 200;
   player.jumpForce = 600;
 
+  player.onCollide('coin-surprise', (obj) => {
+    const gridSize = 16; // replace with your grid size
+    gameLevel.spawn('$', pos(obj.pos.x, obj.pos.y - gridSize));
+    destroy(obj);
+    gameLevel.spawn('}', pos(obj.pos.x, obj.pos.y));
+  });
   // Define left and right movement
   onKeyDown('left', () => {
     player.move(-player.moveSpeed, 0);
