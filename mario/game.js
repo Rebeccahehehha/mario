@@ -56,7 +56,12 @@ scene('game', () => {
         area(),
         body({ isStatic: true })
       ],
-      '*': () => [sprite('surprise'), 'mushroom-surprise'],
+      '*': () => [
+        sprite('surprise'),
+        'mushroom-surprise',
+        area(),
+        body({ isStatic: true })
+      ],
       '{': () => [sprite('unboxed')],
       '(': () => [sprite('pipe-bottom-left'), scale(0.5)],
       ')': () => [sprite('pipe-bottom-right'), scale(0.5)],
@@ -110,10 +115,20 @@ scene('game', () => {
   player.jumpForce = 600;
 
   player.onCollide('coin-surprise', (obj) => {
-    const gridSize = 16; // replace with your grid size
-    gameLevel.spawn('$', pos(obj.pos.x, obj.pos.y - gridSize));
-    destroy(obj);
-    gameLevel.spawn('}', pos(obj.pos.x, obj.pos.y));
+    const gridSize = 20; // The height of a grid cell
+    const coinPos = vec2(obj.pos.x, obj.pos.y - gridSize); // Position the coin above the box
+    destroy(obj); // Remove the surprise box
+    // gameLevel.spawn('$', coinPos); // Spawn a coin at the calculated position
+    add([sprite('coin'), pos(coinPos), area()]);
+    add([sprite('unboxed'), pos(obj.pos.x, obj.pos.y), area()]);
+  });
+  player.onCollide('mushroom-surprise', (obj) => {
+    const gridSize = 20; // The height of a grid cell
+    const coinPos = vec2(obj.pos.x, obj.pos.y - gridSize); // Position the coin above the box
+    destroy(obj); // Remove the surprise box
+    // gameLevel.spawn('$', coinPos); // Spawn a coin at the calculated position
+    add([sprite('mushroom'), pos(coinPos), area()]);
+    add([sprite('unboxed'), pos(obj.pos.x, obj.pos.y), area()]);
   });
   // Define left and right movement
   onKeyDown('left', () => {
