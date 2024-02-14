@@ -67,19 +67,25 @@ scene('game', () => {
       ')': () => [sprite('pipe-bottom-right'), scale(0.5)],
       '-': () => [sprite('pipe-top-left'), scale(0.5)],
       '+': () => [sprite('pipe-top-right'), scale(0.5)],
-      '^': () => [sprite('evil-shroom')]
+      '^': () => [
+        sprite('evil-shroom'),
+        'dangerous',
+        area(),
+        body(),
+        move(LEFT, 35)
+      ]
     }
   };
 
   const gameLevel = addLevel(map, levelCfg);
-  const scoreLable = add([
+  const scoreLabel = add([
     text('score'),
     pos(30, 6),
     {
       value: 'score'
     }
   ]);
-  add([text('level' + 'test', pos(4, 6))]);
+  // add([text('level' + 'test', pos(4, 6))]);
 
   function big() {
     let timer = 0;
@@ -97,11 +103,13 @@ scene('game', () => {
         return isBig;
       },
       smallify() {
+        player.currentJumpForce = player.jumpForce;
         this.scale = vec2(1);
         timer = 0;
         isBig = false;
       },
       biggify(time) {
+        player.currentJumpForce = player.bigJumpForce;
         this.scale = vec2(2);
         timer = time;
         isBig = true;
@@ -113,13 +121,15 @@ scene('game', () => {
   // Set the player's move speed and jump force
   player.moveSpeed = 200;
   player.jumpForce = 600;
+  player.bigJumpForce = 1000;
+  player.currentJumpForce = player.jumpForce;
 
   player.onCollide('coin-surprise', (obj) => {
     const gridSize = 20; // The height of a grid cell
     const coinPos = vec2(obj.pos.x, obj.pos.y - gridSize); // Position the coin above the box
     destroy(obj); // Remove the surprise box
     // gameLevel.spawn('$', coinPos); // Spawn a coin at the calculated position
-    add([sprite('coin'), pos(coinPos), area()]);
+    add([sprite('coin'), pos(coinPos), area(), 'coin']);
     add([sprite('unboxed'), pos(obj.pos.x, obj.pos.y), area()]);
   });
   player.onCollide('mushroom-surprise', (obj) => {
@@ -127,8 +137,30 @@ scene('game', () => {
     const coinPos = vec2(obj.pos.x, obj.pos.y - gridSize); // Position the coin above the box
     destroy(obj); // Remove the surprise box
     // gameLevel.spawn('$', coinPos); // Spawn a coin at the calculated position
-    add([sprite('mushroom'), pos(coinPos), area()]);
+    add([
+      sprite('mushroom'),
+      pos(coinPos),
+      area(),
+      // move(RIGHT, 100),
+      body(),
+      'mushroom'
+    ]);
     add([sprite('unboxed'), pos(obj.pos.x, obj.pos.y), area()]);
+  });
+
+  player.onCollide('mushroom', (m) => {
+    destroy(m);
+    player.biggify(6);
+  });
+
+  player.onCollide('coin', (c) => {
+    destroy(c);
+    scoreLabel.value++;
+    scoreLabel.text = scoreLabel.value;
+  });
+
+  player.onCollide('dangerous', () => {
+    go('game', { score: scoreLabel.value });
   });
   // Define left and right movement
   onKeyDown('left', () => {
@@ -142,7 +174,7 @@ scene('game', () => {
   // Define jumping
   onKeyPress('space', () => {
     if (player.isGrounded()) {
-      player.jump(player.jumpForce);
+      player.jump(player.currentJumpForce);
     }
   });
   // check if player falls off the map
