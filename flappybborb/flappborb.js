@@ -5,6 +5,7 @@ loadSprite('Poptartcat', 'Poptartcat.png');
 loadSprite('Tube', 'Tube.png');
 
 scene('game', () => {
+  let score = 0;
   add([sprite('Background', { width: width(), height: height() })]);
   setGravity(2000);
   const player = add([
@@ -14,17 +15,19 @@ scene('game', () => {
     area(),
     pos(80, 40)
   ]);
+
+  const textScore = add([text(score, 24), pos(12, 12)]);
   player.currentJumpForce = 600;
   onKeyPress('space', () => {
     // isJumping = true;
     player.jump(player.currentJumpForce);
   });
   player.onCollide('Tube', () => {
-    go('Gameover');
+    go('Gameover', score);
   });
   player.onUpdate(() => {
     if (player.pos.y > height() || player.pos.y < 0) {
-      go('Gameover');
+      go('Gameover', score);
     }
   });
 
@@ -39,7 +42,8 @@ scene('game', () => {
       pos(width() - 100, height() / 2 + offset - tubeGap / 2),
       anchor('botleft'),
       'Tube',
-      area()
+      area(),
+      { passed: false }
     ]);
     add([
       sprite('Tube'),
@@ -55,17 +59,26 @@ scene('game', () => {
   });
   onUpdate('Tube', (Tube) => {
     Tube.move(-500, 0);
+
+    if (Tube.passed === false && Tube.pos.x < player.pos.x) {
+      Tube.passed = true;
+      score += 1;
+      textScore.text = score.toString();
+    }
   });
 });
-scene('Gameover', () => {
-  // Add text with size, position, and origin set
+scene('Gameover', (score) => {
   const gameOverText = add([
     text('Gameover:D', 24),
     pos(width() / 2, height() / 2),
-    color(0xff0000) // Set the text color to red (RGB: 1, 0, 0)
+    color(0xff0000)
   ]);
 
-  // Handle the space key press to transition to the 'game' scene
+  const scoreText = add([
+    text('Score: ' + score.toString(), 24),
+    pos(width() / 2, height() / 2 + 40)
+  ]);
+
   onKeyPress('space', () => {
     go('game');
   });
